@@ -1,40 +1,30 @@
 // src/index.js
-
 const express = require('express');
 const dotenv = require('dotenv');
-const cors = require('cors');
 const connectDB = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
-const { errorHandler, notFound } = require('./middleware/errorMiddleware');
+const cors = require('cors');
 
-// Load environment variables
+// Load environment variables from .env file
 dotenv.config();
 
 // Connect to MongoDB
 connectDB();
 
-// Initialize Express app
 const app = express();
+app.use(cors()); // Enable CORS for frontend/backend communication
+app.use(express.json()); // Parse JSON request bodies
 
-// Enable CORS
-app.use(cors());
-
-// Body parser middleware to parse JSON requests
-app.use(express.json());
-
-// Define Routes
+// User routes
 app.use('/api/users', userRoutes);
 
-// Handle undefined Routes
-app.use(notFound);
+// Error handling for undefined routes
+app.use((req, res) => {
+  res.status(404).json({ success: false, message: 'Route not found' });
+});
 
-// Error Handling Middleware
-app.use(errorHandler);
-
-// Define PORT
+// Start the server
 const PORT = process.env.PORT || 5000;
-
-// Start Server
 app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });

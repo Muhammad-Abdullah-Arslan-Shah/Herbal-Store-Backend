@@ -1,79 +1,53 @@
 // src/controllers/userController.js
-
-const User = require('../models/User');
-const asyncHandler = require('express-async-handler');
+const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
+const { handleError } = require('../utils/errorHandler');
 
-// @desc    Register a new user
-// @route   POST /api/users/register
-// @access  Public
-exports.registerUser = asyncHandler(async (req, res, next) => {
-  const { name, email, password, address } = req.body;
-
-  // Check if user already exists
-  const existingUser = await User.findOne({ email });
-  if (existingUser) {
-    res.status(400);
-    throw new Error('User already exists with this email');
-  }
-
-  // Create new user
-  const user = await User.create({
-    name,
-    email,
-    password,
-    address
+// Generate a JWT token
+const generateToken = (user) => {
+  return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
+    expiresIn: '1d',
   });
+};
 
-  sendTokenResponse(user, 201, res);
-});
+// Register user
+exports.registerUser = async (req, res) => {
+  try {
+    const { name, email, password, address } = req.body;
 
-// @desc    Authenticate user & get token
-// @route   POST /api/users/login
-// @access  Public
-exports.loginUser = asyncHandler(async (req, res, next) => {
-  const { email, password } = req.body;
+    // Check if user already exists
+    const userExists = await User.findOne({ email });
+    if (userExists) return handleError(res, 'User already exists', 400);
 
-  // Validate email & password
-  if (!email || !password) {
-    res.status(400);
-    throw new Error('Please provide an email and password');
+    // Create a new user
+    const user = await User.create({ name, email, password, address });
+    res.status(201).json({ 
+      message: 'User registered successfully', 
+      userId: user._id, 
+      token: generateToken(user) 
+    });
+  } catch (error) {
+    handleError(res, error.message, 500);
   }
+};
 
-  // Check for user
-  const user = await User.findOne({ email }).select('+password');
+// Login user
+exports.loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-  if (!user) {
-    res.status(401);
-    throw new Error('Invalid credentials');
+    // Find user by email
+    const user = await User.findOne({ email });
+    if (!user || !(await user.matchPassword(password)))
+      return handleError(res, 'Invalid email or password', 401);
+
+    // Send response with token
+    res.json({ 
+      message: 'Login successful', 
+      userId: user._id, 
+      token: generateToken(user) 
+    });
+  } catch (error) {
+    handleError(res, error.message, 500);
   }
-
-  // Check if password matches
-  const isMatch = await user.matchPassword(password);
-
-  if (!isMatch) {
-    res.status(401);
-    throw new Error('Invalid credentials');
-  }
-
-  sendTokenResponse(user, 200, res);
-});
-
-// Get token from model, create cookie and send response
-const sendTokenResponse = (user, statusCode, res) => {
-  // Create JWT payload
-  const payload = {
-    id: user._id,
-    role: user.role
-  };
-
-  // Sign token
-  const token = jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: '30d' // Token expires in 30 days
-  });
-
-  res.status(statusCode).json({
-    success: true,
-    token
-  });
 };
