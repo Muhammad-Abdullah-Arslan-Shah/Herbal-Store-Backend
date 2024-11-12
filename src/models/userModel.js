@@ -1,7 +1,7 @@
 // Import necessary modules
  // Mongoose is used for modeling MongoDB data
  import mongoose from "mongoose";
-import bcrypt from "bcrypt"; // Bcrypt is used to hash and compare passwords securely
+import bcrypt from "bcryptjs"; // Bcrypt is used to hash and compare passwords securely
 
 // Define the schema for the User model
 const userSchema = new mongoose.Schema(
