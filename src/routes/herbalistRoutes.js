@@ -1,4 +1,5 @@
 import express from 'express';
+import { upload } from "../middlewares/multer.middleware.js"; // Import multer middleware
 import {
   createHerbalist,
   getAllHerbalists,
@@ -15,7 +16,7 @@ const router = express.Router();
 router.post('/login', herbalistLogin);
 
 // Admin Route: Create a new herbalist
-router.post('/Add',userAuth, adminAuth, createHerbalist);
+router.post('/Add',userAuth, adminAuth,upload, createHerbalist);
 
 // Admin Route: Get all herbalists
 router.get('/',userAuth, adminAuth, getAllHerbalists);

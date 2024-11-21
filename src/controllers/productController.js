@@ -1,14 +1,25 @@
 import Product from "../models/productModel.js"; // Import Product model
 import handleError from "../utils/errorHandler.js"; // Import error handling utility
+import { uploadOnCloudinary } from "../utils/cloudinary.js"; // Import Cloudinary utility
+import { ApiResponse } from "../utils/ApiResponse.js"; // Import ApiResponse class
 
 // Create a new product
 const addProduct = async (req, res) => {
   try {
-    const { name, price, description, category, image, quantity, stockCount } = req.body;
+    const { name, price, description, category, quantity, stockCount } = req.body;
 
     // Validate required fields
-    if (!name || !price || !description || !category || !image || !quantity || !stockCount) {
-      return handleError(res, "All fields are required", 400);
+    if (!name || !price || !description || !category || !quantity || !stockCount) {
+      return res.status(400).json(new ApiResponse(400, null, "All fields except image are required"));
+    }
+
+    // Upload image to Cloudinary
+    let imageUrl = null;
+    if (req.file) {
+      const cloudinaryResponse = await uploadOnCloudinary(req.file.path);
+      if (cloudinaryResponse) {
+        imageUrl = cloudinaryResponse.url; // Save the Cloudinary URL
+      }
     }
 
     // Create a new product
@@ -17,18 +28,14 @@ const addProduct = async (req, res) => {
       price,
       description,
       category,
-      image,
+      image: imageUrl,
       quantity,
       stockCount,
     });
 
     // Send success response
-    res.status(201).json({
-      success: true,
-      product,
-    });
+    res.status(201).json(new ApiResponse(201, product));
   } catch (error) {
-    // Handle errors during creation
     handleError(res, error.message, 500);
   }
 };
@@ -40,12 +47,8 @@ const getAllProducts = async (req, res) => {
     const products = await Product.find();
 
     // Send the list of products
-    res.status(200).json({
-      success: true,
-      products,
-    });
+    res.status(200).json(new ApiResponse(200, products));
   } catch (error) {
-    // Handle errors during retrieval
     handleError(res, error.message, 500);
   }
 };
@@ -60,16 +63,12 @@ const getProductById = async (req, res) => {
 
     // If product is not found
     if (!product) {
-      return handleError(res, "Product not found", 404);
+      return res.status(404).json(new ApiResponse(404, null, "Product not found"));
     }
 
     // Send product details
-    res.status(200).json({
-      success: true,
-      product,
-    });
+    res.status(200).json(new ApiResponse(200, product));
   } catch (error) {
-    // Handle errors during retrieval by ID
     handleError(res, error.message, 500);
   }
 };
@@ -80,21 +79,24 @@ const updateProduct = async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
+    // If a new image is uploaded, upload it to Cloudinary
+    if (req.file) {
+      const cloudinaryResponse = await uploadOnCloudinary(req.file.path);
+      if (cloudinaryResponse) {
+        updates.image = cloudinaryResponse.url; // Update the image URL
+      }
+    }
+
     // Find and update the product by ID
     const product = await Product.findByIdAndUpdate(id, updates, { new: true });
 
-    // If product is not found
     if (!product) {
-      return handleError(res, "Product not found", 404);
+      return res.status(404).json(new ApiResponse(404, null, "Product not found"));
     }
 
     // Send updated product details
-    res.status(200).json({
-      success: true,
-      product,
-    });
+    res.status(200).json(new ApiResponse(200, product,"Product updated successfully"));
   } catch (error) {
-    // Handle errors during update
     handleError(res, error.message, 500);
   }
 };
@@ -109,19 +111,15 @@ const deleteProduct = async (req, res) => {
 
     // If product is not found
     if (!product) {
-      return handleError(res, "Product not found", 404);
+      return res.status(404).json(new ApiResponse(404, null, "Product not found"));
     }
 
     // Send success response for deletion
-    res.status(200).json({
-      success: true,
-      message: "Product deleted successfully",
-    });
+    res.status(200).json(new ApiResponse(200, null, "Product deleted successfully"));
   } catch (error) {
-    // Handle errors during deletion
     handleError(res, error.message, 500);
   }
 };
 
 // Export all CRUD operation handlers
-export  { addProduct, getAllProducts, getProductById, updateProduct, deleteProduct };
+export { addProduct, getAllProducts, getProductById, updateProduct, deleteProduct };

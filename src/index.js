@@ -8,7 +8,7 @@ import orderRoutes from './routes/orderRoutes.js';
 import cors from 'cors'; // CORS middleware to allow cross-origin requests (for frontend/backend communication)
 import appointmentRoutes from './routes/appointmentRoutes.js';
 import herbalistRoutes from './routes/herbalistRoutes.js';
-import paymentRoutes from './routes/paymentRoutes.js';
+
 // Load environment variables from a .env file into process.env
 // (e.g., variables like PORT, DB connection string)
 dotenv.config();
@@ -36,11 +36,11 @@ app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/herbalists', herbalistRoutes);
-app.use('/api/payment', paymentRoutes);
+
 // Error handling middleware for undefined routes
 // If a request is made to a route that is not defined, this will send a 404 response
 app.use((req, res) => {
-  res.status(404).json({ success: false, message: 'Route not found' });
+  res.status(404).json({ success: false, message: ' Sorry Route not found' });
 });
 
 // Start the server:

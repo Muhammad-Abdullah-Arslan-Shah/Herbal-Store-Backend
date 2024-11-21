@@ -16,6 +16,10 @@ const herbalistSchema = new mongoose.Schema({
     type: String,
     required: true, // Password is required
   },
+  image: {
+    type: String,
+    required: true, 
+  },
   specialty: {
     type: String,
     required: true,

@@ -15,7 +15,8 @@ const userAuth = async (req, res, next) => {
       return res.status(401).json({ error: 'User not found' });
     }
 
-    req.user = user; // Attach user to request
+    req.user = user;
+    console.log("Current User:",req.user) // Attach user to request
     next();
   } catch (error) {
     res.status(401).json({ error: 'Unauthorized access' });
