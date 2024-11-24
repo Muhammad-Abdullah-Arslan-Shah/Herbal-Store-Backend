@@ -3,8 +3,8 @@ import express from 'express';
 import {
   registerUser,
   loginUser,
-  getUserDetails,
   getCurrentUser,
+  getUserDetails,
   updateUserDetails,
   deleteUser,
   getAllUsers,
@@ -15,16 +15,20 @@ import userAuth from "../middlewares/authMiddleware.js"; // Middleware to ensure
 
 const router = express.Router();
 
+// Route to get the currently authenticated user (protected route)
+router.get('/me', userAuth , getCurrentUser);
+
 // Route to register a new user
 router.post('/register', registerUser);
 
 // Route to log in an existing user
 router.post('/login', loginUser);
 
+
+
 // Route to get details of a single user (protected route)
 router.get('/:id', userAuth , getUserDetails);
 
-router.get("/currrentUser", userAuth , getCurrentUser);
 
 
 // Route to update details of a user (protected route)

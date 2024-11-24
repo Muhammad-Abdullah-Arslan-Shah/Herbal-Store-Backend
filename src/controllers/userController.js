@@ -122,21 +122,32 @@ const getAllUsers = async (req, res) => {
 };
 
 const getCurrentUser = async (req, res) => {
+  console.log("Inside getCurrentUser Controller");  // Add this log to confirm function is triggered
   try {
-    const user = await User.findById(req.user.id).select('-password');
-    if (!user) return res.status(404).json(new ApiResponse(404, null, 'User not found'));
+    const user = req.user;
 
-    res.status(200).json(new ApiResponse(200, user, 'Current user details retrieved successfully'));
+    if (!user) {
+      return res.status(404).json(new ApiResponse(404, null, 'User not found'));
+    }
+
+    res.status(200).json(new ApiResponse(
+      200,
+      user,
+      "User fetched successfully"
+    ));
   } catch (error) {
-    handleError(res, error.message, 500);
+    res.status(500).json(new ApiResponse(500, null, "Failed to fetch user details"));
   }
 };
+
+
+
 
 export { 
   registerUser, 
   loginUser, 
-  getUserDetails, 
   getCurrentUser,
+  getUserDetails, 
   updateUserDetails, 
   deleteUser, 
   getAllUsers 

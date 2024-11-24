@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
 
     // 'address' field is an optional string to store the user's address
-    address: { type: String },
+    address: { type: String,required: true},
 
     // 'role' field defines the user's role in the system
     // Default is "Customer", and can be one of the following: "Customer", "Admin", or "Herbalist"

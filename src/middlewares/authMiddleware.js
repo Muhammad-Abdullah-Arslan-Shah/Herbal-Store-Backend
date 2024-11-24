@@ -1,4 +1,3 @@
-// userAuth middleware example
 import jwt from 'jsonwebtoken';
 import User from '../models/userModel.js';
 
@@ -10,13 +9,14 @@ const userAuth = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id);
+   
+    const user = await User.findById(decoded.id).select('-password'); // Ensure `id` in token matches a valid ObjectId
     if (!user) {
       return res.status(401).json({ error: 'User not found' });
     }
 
-    req.user = user;
-    console.log("Current User:",req.user) // Attach user to request
+    req.user = user; // Attach user object to the request
+   
     next();
   } catch (error) {
     res.status(401).json({ error: 'Unauthorized access' });
