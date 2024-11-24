@@ -4,6 +4,7 @@ import {
   registerUser,
   loginUser,
   getUserDetails,
+  getCurrentUser,
   updateUserDetails,
   deleteUser,
   getAllUsers,
@@ -22,6 +23,9 @@ router.post('/login', loginUser);
 
 // Route to get details of a single user (protected route)
 router.get('/:id', userAuth , getUserDetails);
+
+router.get("/currrentUser", userAuth , getCurrentUser);
+
 
 // Route to update details of a user (protected route)
 router.put('/:id', userAuth , updateUserDetails);

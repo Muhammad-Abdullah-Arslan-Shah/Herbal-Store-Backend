@@ -121,10 +121,22 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+const getCurrentUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) return res.status(404).json(new ApiResponse(404, null, 'User not found'));
+
+    res.status(200).json(new ApiResponse(200, user, 'Current user details retrieved successfully'));
+  } catch (error) {
+    handleError(res, error.message, 500);
+  }
+};
+
 export { 
   registerUser, 
   loginUser, 
   getUserDetails, 
+  getCurrentUser,
   updateUserDetails, 
   deleteUser, 
   getAllUsers 
